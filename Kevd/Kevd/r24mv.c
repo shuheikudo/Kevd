@@ -295,64 +295,6 @@ void getcol(int i, const double* a, double* b)
 	}
 }
 
-
-void getcol4(int id, int i, const double* a, double* b4, double* b3, double* b2, double* b1)
-{
-	// i must be times of 4
-	if (i < 749){
-		if (!id) {
-			int bi = i;
-			a += bi*(bi + 1) / 2;
-			int jend = bi - 2;
-			int j;
-			for (j = 0; j <= jend; j += 2) {
-				st(b4 + j, ld(a + 4 * j + 0));
-				st(b3 + j, ld(a + 4 * j + 2));
-				st(b2 + j, ld(a + 4 * j + 4));
-				st(b1 + j, ld(a + 4 * j + 6));
-			}
-			a += 4 * bi;
-			b4[bi + 0] = a[0];
-			b3[bi + 0] = a[1];
-			b3[bi + 1] = a[4];
-			b2[bi + 0] = a[2];
-			b2[bi + 1] = a[5];
-			b2[bi + 2] = a[7];
-			b1[bi + 0] = a[3];
-			b1[bi + 1] = a[6];
-			b1[bi + 2] = a[8];
-			b1[bi + 3] = a[9];
-		}
-	}
-	else {
-		// i must be times of 4
-		int bi = i;
-		a += bi*(bi + 1) / 2;
-		int jend = bi - 2;
-		int j;
-#pragma omp for nowait
-		for (j = 0; j <= jend; j += 2) {
-			st(b4 + j, ld(a + 4 * j + 0));
-			st(b3 + j, ld(a + 4 * j + 2));
-			st(b2 + j, ld(a + 4 * j + 4));
-			st(b1 + j, ld(a + 4 * j + 6));
-		}
-		if (!id) {
-			a += 4 * bi;
-			b4[bi + 0] = a[0];
-			b3[bi + 0] = a[1];
-			b3[bi + 1] = a[4];
-			b2[bi + 0] = a[2];
-			b2[bi + 1] = a[5];
-			b2[bi + 2] = a[7];
-			b1[bi + 0] = a[3];
-			b1[bi + 1] = a[6];
-			b1[bi + 2] = a[8];
-			b1[bi + 3] = a[9];
-		}
-	}
-}
-
 void getcol1(int i, const double* a, double* b)
 {
 	int bi = i / 4 * 4;
