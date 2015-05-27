@@ -15,8 +15,68 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="test.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="common.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dormtrb.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dsyevdt.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dsytdc.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="r24mv.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="timed.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Make\job.sh">
+      <Filter>Source Files</Filter>
+    </None>
     <None Include="..\Readme.md">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="Make\makefile">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="dlaed3x.f">
+      <Filter>Source Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dormtrb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dsyevdt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dsytdb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="r24mv.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simd_tools.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="timed.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\LICENSE.txt">
+      <Filter>Source Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

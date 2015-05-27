@@ -12,6 +12,30 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Readme.md" />
+    <None Include="dlaed3x.f" />
+    <None Include="Make\job.sh" />
+    <None Include="Make\makefile" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="common.c" />
+    <ClCompile Include="dormtrb.c" />
+    <ClCompile Include="dsyevdt.c" />
+    <ClCompile Include="dsytdc.c" />
+    <ClCompile Include="r24mv.c" />
+    <ClCompile Include="test.c" />
+    <ClCompile Include="timed.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="common.h" />
+    <ClInclude Include="dormtrb.h" />
+    <ClInclude Include="dsyevdt.h" />
+    <ClInclude Include="dsytdb.h" />
+    <ClInclude Include="r24mv.h" />
+    <ClInclude Include="simd_tools.h" />
+    <ClInclude Include="timed.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\LICENSE.txt" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{344A5B9E-8EFF-4522-AF93-76C858D13B14}</ProjectGuid>
@@ -44,6 +68,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(HOMEPATH)\Documents\lapack\Lib;</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -60,6 +85,9 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;libblas.lib;liblapack.lib;%(AdditionalDependencies);</AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
