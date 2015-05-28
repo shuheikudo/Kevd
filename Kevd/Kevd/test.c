@@ -6,7 +6,7 @@
 #include "common.h"
 #include "dsyevdt.h"
 
-extern void dgemm_(const char*, const char*, int*, int*, int*, double*, double*, int*, double*, int, double*, double*, int*);
+extern void dgemm_(const char*, const char*, int*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int*);
 
 static void calc_error(int n, double* a, int lda, double* p, int ldp, double* d, double* work)
 {
@@ -39,9 +39,10 @@ static void calc_error(int n, double* a, int lda, double* p, int ldp, double* d,
 
 static void set_matrix(int n, double* a, int lda, int type)
 {
+	int i, j;
 	if (type == 0){
-		for (int i = 0; i < n; ++i)
-			for (int j = 0; j < n; ++j)
+		for (i = 0; i < n; ++i)
+			for (j = 0; j < n; ++j)
 				a[i*lda + j] = (double)(i < j ? i : j) + 1;
 	}
 }

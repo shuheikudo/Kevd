@@ -126,15 +126,19 @@ void dsyevdeasy_(int* n, double* a, int* lda, double* w)
 	double* work = (double*)bje_alloc(lwork*sizeof(double));
 	if (!iwork || !work) abort();
 	if ((*lda) % 2){
+		int i;
 		int lda2 = n + 1;
-		double* t;
+		double* t, *t2;
 		if (!(t = (double*)bje_alloc(*n*lda2*sizeof(double)))) abort();
-		for (int i = 0; i < *n; ++i)
+		if (!(t2 = (double*)bje_alloc(lda2*sizeof(double)))) abort();
+		for (i = 0; i < *n; ++i)
 			memcpy(t + lda2*i, a + *n * i, sizeof(double)**n);
-		if (dsyevdt('V', 'U', *n, t, lda2, w, work, lwork, iwork, liwork)) abort();
-		for (int i = 0; i < *n; ++i)
+		if (dsyevdt('V', 'U', *n, t, lda2, t2, work, lwork, iwork, liwork)) abort();
+		for (i = 0; i < *n; ++i)
 			memcpy(a + *n * i, t + lda2*i, sizeof(double)**n);
+		memcpy(t, t2, sizeof(double)*lda2);
 		bje_free(t);
+		bje_free(t2);
 	}
 	else
 		if (dsyevdt('V', 'U', *n, a, *lda, w, work, lwork, iwork, liwork)) abort();
