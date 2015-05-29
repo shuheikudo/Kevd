@@ -1,9 +1,7 @@
 // Copyright by Shuhei Kudo, May 2015.
 //
-// This source code is derived from LAPACK:
-// Univ. of Tennessee, Oak Ridge National Lab, Argonne National Lab,
-// Courant Institute, NAG Ltd., and Rice University
-// June 30, 1999
+// This source code is derived from LAPACK source code.
+
 #include <math.h>
 #include <string.h>
 #include <stdio.h>
