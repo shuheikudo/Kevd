@@ -3,14 +3,14 @@
 #--------------------------------------------
 FC=gfortran
 CC=gcc
-CCFLAG=-Ofast -fopenmp -ftree-vectorize -march=native -mtune=native
+CCFLAG=-Wall -Wextra -Ofast -fopenmp -ftree-vectorize -march=native -mtune=native -g3
 
 BLAS=-lblas -llapack
 LD=$(FC)
 LDFLAG=$(CCFLAG) $(BLAS)
 
-MAIN=test
-LOAD=test
+MAIN=test.out
+LOAD=test.out
 
 OBJS=common.o dormtrb.o dsyevdt.o dsytdc.o r24mv.o timed.o test.o dlaed3x.o
 

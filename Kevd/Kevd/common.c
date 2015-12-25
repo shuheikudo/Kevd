@@ -14,8 +14,4 @@ void bje_free(void* p)
 {
 	free(p);
 }
-void* bje_alloca(size_t size)
-{
-	return alloca(size);
-}
 #endif

@@ -17,10 +17,7 @@ inline void bje_free(void* p)
 {
 	_aligned_free(p);
 }
-inline void* bje_alloca(size_t size)
-{
-	return _malloca(size);
-}
+#define bje_alloca(size) _malloca(size)
 typedef uintptr_t UPTR_T;
 #define PRAGMA(A) __pragma(A)
 #else
@@ -28,7 +25,7 @@ typedef uintptr_t UPTR_T;
 #include <stdlib.h>
 void* bje_alloc(size_t size);
 void bje_free(void* p);
-void* bje_alloca(size_t size);
+#define bje_alloca(size) alloca(size)
 typedef unsigned long long UPTR_T;
 #define PRAGMA(A) _Pragma(#A)
 #endif

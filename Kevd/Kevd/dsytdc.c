@@ -341,10 +341,6 @@ static void make34(int id, int n, double* u0, double* v0, double* u1, double* v1
 
 int dsytdc(int n, double* a, int lda, double* d, double* e, double* tau, double* work)
 {
-#ifdef __FUJITSU
-	double* array[16]; // alloca を回避。アライメント関連の問題？？
-#endif
-
 	int mx = omp_get_max_threads();
 	int doomp = (n - 1 >= MPSIZE && mx > 1);
 
@@ -354,11 +350,7 @@ int dsytdc(int n, double* a, int lda, double* d, double* e, double* tau, double*
 	double* y = work + 13 * lda;
 
 	if (doomp) {
-#ifdef __FUJITSU
-		ys = array;
-#else
 		ys = (double**)bje_alloca(mx*sizeof(double*));
-#endif
 		int i;
 		for (i = 0; i < mx; ++i) {
 			ys[i] = work + (13 + i) * lda;

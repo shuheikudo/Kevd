@@ -27,12 +27,6 @@ static int dlascl_c(char uplo, int kl, int ku, double cfrom, double cto, int m, 
 	return info;
 }
 
-extern int ilaenv_(const int*, const char*, const char*, const int*, const int*, const int*, const int *);
-static int ilaenv_c(int ispec, const char* name, char opts, int n1, int n2, int n3, int n4)
-{
-	return ilaenv_(&ispec, name, &opts, &n1, &n2, &n3, &n4);
-}
-
 extern void dscal_(const int*, const double*, double*, const int*);
 static void dscal_c(int n, double scl, double* a, int step)
 {
@@ -100,6 +94,8 @@ static int check_arg(char jobz, char uplo, int n, int lda, int lwork, int liwork
 
 void dsyevdt_worksizes(char jobz, char uplo, int n, int num_threads, int* lwork, int* liwork)
 {
+	jobz = jobz; // unused
+	uplo = uplo; // unused
 	if (n <= 1){
 		*lwork = *liwork = 1;
 	}
