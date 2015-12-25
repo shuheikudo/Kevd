@@ -5,7 +5,7 @@
 
 #ifdef _MSC_VER
 #define inline __inline
-#define NOINLINE 
+#define NOINLINE
 // 16-byte alighned alloc
 #include <stdlib.h>
 #include <malloc.h>
@@ -32,4 +32,5 @@ void* bje_alloca(size_t size);
 typedef unsigned long long UPTR_T;
 #define PRAGMA(A) _Pragma(#A)
 #endif
+
 #endif

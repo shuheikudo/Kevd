@@ -3,15 +3,24 @@
 #include "common.h"
 #include "simd_tools.h"
 
+#ifdef __FUJITSU
+#define opt_loop PRAGMA(loop noalias) PRAGMA(loop swp) PRAGMA(loop unroll 2) PRAGMA(loop simd aligned)
+#define opt_loop4 PRAGMA(loop noalias) PRAGMA(loop swp) PRAGMA(loop unroll 4) PRAGMA(loop simd aligned) PRAGMA(loop prefetch)
+#define pragma_loop(A) PRAGMA__(loop A)
+#define pragma_proc(A) PRAGMA__(procedure A)
+#else
+#define opt_loop
+#define opt_loop4
+#define pragma_loop(A)
+#define pragma_proc(A)
+#endif
+
+
 void rotate_uvb(int n, double* x, double* uf, double* vf, int lda, int ldv, double* to)
 {
 	int i;
-#pragma loop eval
-#pragma loop unroll 4
-#pragma loop simd 
-#pragma loop prefetch
 #pragma omp for
-	for (i = 0; i < n; i += 2){
+	opt_loop for (i = 0; i < n; i += 2){
 		st(to + 9 * i + 0, ld(x + i));
 
 		st(to + 9 * i + 2, ld(uf + 0 * lda + i));
@@ -30,12 +39,8 @@ void rotate_uvb(int n, double* x, double* uf, double* vf, int lda, int ldv, doub
 void rotate_uvb1(int n, double* x, double* uf, double* vf, double* to)
 {
 	int i;
-#pragma loop eval
-#pragma loop unroll 4
-#pragma loop simd 
-#pragma loop prefetch
 #pragma omp for
-	for (i = 0; i < n; i += 2){
+	opt_loop4 for (i = 0; i < n; i += 2){
 		st(to + 3 * i + 0, ld(x + i));
 		st(to + 3 * i + 2, ld(uf + i));
 		st(to + 3 * i + 4, ld(vf + i));
@@ -45,10 +50,7 @@ void rotate_uvb1(int n, double* x, double* uf, double* vf, double* to)
 void rotate_uvb11(int n, double* x, double* uf, double* vf, double* to)
 {
 	int i;
-#pragma loop eval
-#pragma loop unroll 4
-#pragma loop simd 
-#pragma loop prefetch
+	opt_loop4
 	for (i = 0; i < n; i += 2){
 		st(to + 3 * i + 0, ld(x + i));
 		st(to + 3 * i + 2, ld(uf + i));
@@ -56,13 +58,7 @@ void rotate_uvb11(int n, double* x, double* uf, double* vf, double* to)
 	}
 }
 
-#ifdef __FUJITSU
-#define opt_loop PRAGMA(loop noalias) PRAGMA(loop swp) PRAGMA(loop unroll 2) PRAGMA(loop simd aligned)
-#else
-#define opt_loop
-#endif
-
-#define IDef0(A, B) 
+#define IDef0(A, B)
 #define IDef1(A, B) A B##0
 #define IDef2(A, B) IDef1(A, B), B##1
 #define IDef3(A, B) IDef2(A, B), B##2
@@ -201,8 +197,8 @@ void rotate_uvb11(int n, double* x, double* uf, double* vf, double* to)
 
 void reorder(int n, const double* a, int lda, double* b)
 {
-#pragma procedure nofltld
-#pragma procedure noalias
+	pragma_proc(noalias);
+	pragma_proc(nofltld);
 
 	int i;
 #pragma omp for schedule(static, 2)
@@ -210,10 +206,10 @@ void reorder(int n, const double* a, int lda, double* b)
 		int j;
 		double* p = b + i * (i + 1) / 2;
 		if (i + 4 <= n) {
-#pragma loop xfill
-#pragma loop noalias
-#pragma loop unroll
-#pragma loop simd aligned
+pragma_loop(xfill)
+pragma_loop(noalias)
+pragma_loop(unroll)
+pragma_loop(simd aligned)
 			for (j = 0; j + 2 <= i; j += 2) {
 				st(p + 4 * j + 0, ld(a + (i + 0) * lda + j));
 				st(p + 4 * j + 2, ld(a + (i + 1) * lda + j));
@@ -232,9 +228,9 @@ void reorder(int n, const double* a, int lda, double* b)
 			p[4 * j + 9] = a[lda*(i + 3) + j + 3];
 		}
 		else {
-#pragma loop xfill
-#pragma loop noalias
-#pragma loop simd aligned
+pragma_loop(xfill)
+pragma_loop(noalias)
+pragma_loop(simd aligned)
 			for (j = 0; j + 2 <= i; j += 2) {
 				p[4 * j + 0] = a[lda*i + j];
 				p[4 * j + 1] = a[lda*i + j + 1];
@@ -359,7 +355,7 @@ void getcol1(int i, const double* a, double* b)
 
 void dsymvb(int n, const double* a, const double* x, double* y)
 {
-#pragma procedure nofltld
+	pragma_proc(nofltld)
 	int i;
 	for (i = 0; i < n; ++i) y[i] = 0.;
 #pragma omp for schedule(static, 2)
@@ -435,28 +431,28 @@ void dsymvb(int n, const double* a, const double* x, double* y)
 }
 
 #define r2mvdef(M, N)		\
-	SDef(u, M);				\
-	SDef(v, M);				\
-	SDef(x, M);				\
-	SLd(u, (u + i), M);		\
-	SLd(v, (v + i), M);		\
-	SLd(x, (x + i), M);		\
-	Def(xu, M);				\
-	Def(xv, M);				\
-	Def(xx, M);				\
-	Def(xy, M);				\
-	Set(xu, u, M);			\
-	Set(xv, v, M);			\
-	Set(xx, x, M);			\
-	Zero(xy, M);			\
+	SDef(u, M);		\
+	SDef(v, M);		\
+	SDef(x, M);		\
+	SLd(u, (u + i), M);	\
+	SLd(v, (v + i), M);	\
+	SLd(x, (x + i), M);	\
+	Def(xu, M);		\
+	Def(xv, M);		\
+	Def(xx, M);		\
+	Def(xy, M);		\
+	Set(xu, u, M);		\
+	Set(xv, v, M);		\
+	Set(xx, x, M);		\
+	Zero(xy, M);		\
 	d2v xvj, xuj, xxj, xyj;	\
 	d2v yvj, yuj, yxj, yyj;	\
-	Def(xa, M);				\
-	Def(ya, M);				\
-	xvj = ld(v + j);		\
-	xuj = ld(u + j);		\
-	xxj = ld(x + j);		\
-	xyj = ld(y + j);		\
+	Def(xa, M);		\
+	Def(ya, M);		\
+	xvj = ld(v + j);	\
+	xuj = ld(u + j);	\
+	xxj = ld(x + j);	\
+	xyj = ld(y + j);	\
 	Ld(xa, ca, 0, M, N);
 #define r2mvkernel(M, N)	\
 	Ld(ya, ca, j + 2, M, N);\
@@ -494,46 +490,46 @@ void dsymvb(int n, const double* a, const double* x, double* y)
 #define lduv(I, K, D, U) lduv##K(I, K, D, U)
 
 #define strd1(I, K) (I * (4 * K + 2))
-#define ldxuv1(K)											\
-	x0  = xuv[strd0(K, i) + strd1(0, K) + 0];				\
-	lduv(0, K, strd1(0, K) + 2, u);							\
+#define ldxuv1(K)					\
+	x0  = xuv[strd0(K, i) + strd1(0, K) + 0];	\
+	lduv(0, K, strd1(0, K) + 2, u);			\
 	lduv(0, K, strd1(0, K) + (2 * K + 2), v);
-#define ldxuv2(K) ldxuv1(K);								\
-	x1  = xuv[strd0(K, i) + strd1(0, K) + 1];				\
-	lduv(1, K, strd1(0, K) + 3, u);							\
+#define ldxuv2(K) ldxuv1(K);				\
+	x1  = xuv[strd0(K, i) + strd1(0, K) + 1];	\
+	lduv(1, K, strd1(0, K) + 3, u);			\
 	lduv(1, K, strd1(0, K) + (2 * K + 3), v);
-#define ldxuv3(K) ldxuv2(K);								\
-	x2  = xuv[strd0(K, i) + strd1(1, K) + 0];				\
-	lduv(2, K, strd1(1, K) + 2, u);							\
+#define ldxuv3(K) ldxuv2(K);				\
+	x2  = xuv[strd0(K, i) + strd1(1, K) + 0];	\
+	lduv(2, K, strd1(1, K) + 2, u);			\
 	lduv(2, K, strd1(1, K) + (2 * K + 2), v);
-#define ldxuv4(K) ldxuv3(K);								\
-	x3  = xuv[strd0(K, i) + strd1(1, K) + 1];				\
-	lduv(3, K, strd1(1, K) + 3, u);							\
+#define ldxuv4(K) ldxuv3(K);				\
+	x3  = xuv[strd0(K, i) + strd1(1, K) + 1];	\
+	lduv(3, K, strd1(1, K) + 3, u);			\
 	lduv(3, K, strd1(1, K) + (2 * K + 3), v);
-#define ldxuv5(K) ldxuv4(K);								\
-	x4  = xuv[strd0(K, i) + strd1(2, K) + 0];				\
-	lduv(4, K, strd1(2, K) + 2, u);							\
+#define ldxuv5(K) ldxuv4(K);				\
+	x4  = xuv[strd0(K, i) + strd1(2, K) + 0];	\
+	lduv(4, K, strd1(2, K) + 2, u);			\
 	lduv(4, K, strd1(2, K) + (2 * K + 2), v);
-#define ldxuv6(K) ldxuv5(K);								\
-	x5  = xuv[strd0(K, i) + strd1(2, K) + 1];				\
-	lduv(5, K, strd1(2, K) + 3, u);							\
+#define ldxuv6(K) ldxuv5(K);				\
+	x5  = xuv[strd0(K, i) + strd1(2, K) + 1];	\
+	lduv(5, K, strd1(2, K) + 3, u);			\
 	lduv(5, K, strd1(2, K) + (2 * K + 3), v);
 #define ldxuv(K, M) ldxuv##M(K)
 
-#define Ldxuv(X, J, K)									\
-	X##xj = ld(xuv + (2 * K + 1) * (J));				\
-	Ld(X##uj, (xuv + 2), J, K, (2 * K + 1));			\
+#define Ldxuv(X, J, K)					\
+	X##xj = ld(xuv + (2 * K + 1) * (J));		\
+	Ld(X##uj, (xuv + 2), J, K, (2 * K + 1));	\
 	Ld(X##vj, (xuv + 2 * K + 2), J, K, (2 * K + 1));
 
-#define r2kmvdef(K, M, N)	\
+#define r2kmvdef(K, M, N)		\
 	SDefmv(u, K, M);		\
 	SDefmv(v, K, M);		\
-	SDef(x, M);				\
+	SDef(x, M);			\
 	ldxuv(K, M);			\
 	Defmv(xu, K, M);		\
 	Defmv(xv, K, M);		\
-	Def(xx, M);				\
-	Def(xy, M);				\
+	Def(xx, M);			\
+	Def(xy, M);			\
 	Setmv(xu, u, K, M);		\
 	Setmv(xv, v, K, M);		\
 	Set(xx, x, M);			\
@@ -544,23 +540,23 @@ void dsymvb(int n, const double* a, const double* x, double* y)
 	Def(yvj, K);			\
 	d2v xxj, xyj;			\
 	d2v yxj, yyj;			\
-	Def(xa, M);				\
-	Def(ya, M);				\
+	Def(xa, M);			\
+	Def(ya, M);			\
 	xyj = ld(y + j);		\
 	Ldxuv(x, j, K);			\
 	Ld(xa, ca, 0, M, N);
-#define r2kmvkernel(K, M, N)	\
+#define r2kmvkernel(K, M, N)		\
 	Ld(ya, ca, j + 2, M, N);	\
-	Ldxuv(y, j + 2, K);			\
+	Ldxuv(y, j + 2, K);		\
 	yyj = ld(y + j + 2);		\
 	Mredr1(xa, xuj, xv, K, M);	\
 	Mredr1(xa, xvj, xu, K, M);	\
 	Mred(xyj, xa, xx, M);		\
 	Madd(xy, xxj, xa, M);		\
 	St(xa, ca, j, M, N);		\
-	st(y + j, xyj);				\
+	st(y + j, xyj);			\
 	Ld(xa, ca, j + 4, M, N);	\
-	Ldxuv(x, j + 4, K);			\
+	Ldxuv(x, j + 4, K);		\
 	xyj = ld(y + j + 4);		\
 	Mredr1(ya, yvj, xu, K, M);	\
 	Mredr1(ya, yuj, xv, K, M);	\
@@ -582,8 +578,8 @@ void dsymvb(int n, const double* a, const double* x, double* y)
 #define K 4
 void dsyr24_mvb(int n, double* a, const double* xuv, double* y)
 {
-#pragma procedure nofltld
-#pragma procedure noalias
+	pragma_proc(nofltld);
+	pragma_proc(noalias);
 
 	int i;
 	for (i = 0; i < n; ++i) y[i] = 0.;
@@ -692,8 +688,8 @@ void dsyr24_mvb(int n, double* a, const double* xuv, double* y)
 #define K 1
 void dsyr21_mvb(int n, double* a, const double* xuv, double* y)
 {
-#pragma procedure nofltld
-#pragma procedure noalias
+	pragma_proc(nofltld);
+	pragma_proc(noalias);
 
 	int i;
 	for (i = 0; i < n; ++i) y[i] = 0.;

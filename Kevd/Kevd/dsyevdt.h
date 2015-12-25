@@ -3,7 +3,7 @@
 #define DSYEVDT_H
 #ifdef __cplusplus
 extern "C" {
-#endif}
+#endif
 	void dsyevdeasy_(int* n, double* a, int* lda, double* w);
 	void dsyevdt_(const char* jobz, const char* uplo, int* n, double* a, int* lda, double* w, double* work, int* lwork, int* iwork, int* liwork, int * info);
 	int dsyevdt(char jobz, char uplo, int n, double* a, int lda, double* w, double* work, int lwork, int* iwork, int liwork);

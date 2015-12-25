@@ -125,7 +125,7 @@ void dsyevdeasy_(int* n, double* a, int* lda, double* w)
 	if (!iwork || !work) abort();
 	if ((*lda) % 2){
 		int i;
-		int lda2 = n + 1;
+		int lda2 = *n + 1;
 		double* t, *t2;
 		if (!(t = (double*)bje_alloc(*n*lda2*sizeof(double)))) abort();
 		if (!(t2 = (double*)bje_alloc(lda2*sizeof(double)))) abort();
@@ -148,8 +148,7 @@ void dsyevdeasy_(int* n, double* a, int* lda, double* w)
 void dsyevdt_(const char* jobz, const char* uplo, int* n, double* a, int* lda, double* w, double* work, int* lwork, int* iwork, int* liwork, int * info)
 {
 	if (*lwork == -1){
-		dsyevdt_worksizes(*jobz, *uplo, n, omp_get_max_threads(), lwork, liwork);
-		return 0;
+		dsyevdt_worksizes(*jobz, *uplo, *n, omp_get_max_threads(), lwork, liwork);
 	}
 	else {
 		*info = dsyevdt(*jobz, *uplo, *n, a, *lda, w, work, *lwork, iwork, *liwork);
@@ -175,7 +174,7 @@ int dsyevdt(char jobz, char uplo, int n, double* a, int lda, double* w, double* 
 	double eps = dlamch_("Precision");
 	double rmin = sqrt(safemin / eps);
 	double rmax = sqrt(eps / safemin);
-	
+
 	// Scale matrix to allowable range, if necessary.
 	double sigma = 0.;
 	double anrm = dlansy_("M", &uplo, &n, a, &lda, work);
@@ -188,8 +187,7 @@ int dsyevdt(char jobz, char uplo, int n, double* a, int lda, double* w, double* 
 	int neven = (n + 1) / 2 * 2;
 	double* wtau = work + neven; // must be 16-byte aligned
 	double* wwrk = wtau + neven; // also
-	int LLWORK = lwork - 2 * neven;
-	
+
 	MEASUREI(info, "dsytrd", dsytdc, n, a, lda, w, work, wtau, wwrk);
 	if (info) return info;
 

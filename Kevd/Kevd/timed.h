@@ -58,17 +58,17 @@ unsigned dec_indent(void);
 #define MEASURE(TAG, FUN, ...)\
 	do{\
 		int my_id = get_log_id();\
-		log_current_time(my_id, inc_indent(), TAG ## "_st");\
+		log_current_time(my_id, inc_indent(), TAG "_st");\
 		FUN(__VA_ARGS__);\
-		log_current_time(my_id, dec_indent(), TAG ## "_ed");\
+		log_current_time(my_id, dec_indent(), TAG "_ed");\
 				}while(0)
 
 #define MEASUREI(INFO, TAG, FUN, ...)\
 	do{\
 		int my_id = get_log_id();\
-		log_current_time(my_id, inc_indent(), TAG ## "_st");\
+		log_current_time(my_id, inc_indent(), TAG "_st");\
 		INFO = FUN(__VA_ARGS__);\
-		log_current_time(my_id, dec_indent(), TAG ## "_ed");\
+		log_current_time(my_id, dec_indent(), TAG "_ed");\
 			}while(0)
 
 #endif

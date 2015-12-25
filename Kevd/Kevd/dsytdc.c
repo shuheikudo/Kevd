@@ -17,13 +17,15 @@
 extern void dlarfg_(const int*, double*, double*, const int*, double*);
 static double dlarfg_c(int n, double* ap, double* b);
 #define omp_single PRAGMA(omp single)
-#define omp_for1  PRAGMA(loop unroll 4) PRAGMA(loop noalias) PRAGMA(loop simd) PRAGMA(omp for)
-#define omp_for2 PRAGMA(loop unroll 4) PRAGMA(loop noalias) PRAGMA(loop simd) PRAGMA(omp for nowait)
 #define omp_barrier PRAGMA(omp barrier)
 #define omp_atomic PRAGMA(omp atomic)
 #ifdef __FUJITSU
+#define omp_for1  PRAGMA(loop unroll 4) PRAGMA(loop noalias) PRAGMA(loop simd) PRAGMA(omp for)
+#define omp_for2 PRAGMA(loop unroll 4) PRAGMA(loop noalias) PRAGMA(loop simd) PRAGMA(omp for nowait)
 #define simd_for PRAGMA(loop unroll 8) PRAGMA(loop noalias) PRAGMA(loop simd aligned)
 #else
+#define omp_for1  PRAGMA(omp for)
+#define omp_for2  PRAGMA(omp for nowait)
 #define simd_for
 #endif
 
@@ -61,6 +63,7 @@ double red0, red1, red2, red3, red4, red5, red6;
 
 static void make01(int id, int n, double* u0, double* v0, double* u1, double* y, double r0, double* b1, double *r1)
 {
+	id = id; // unused variable
 	if (n < MPSIZEL1){
 		omp_single{
 			int j;
@@ -112,6 +115,7 @@ static void make011(int n, double* u0, double* v0, double* u1, double* y, double
 
 static void make12(int id, int n, double* u0, double* v0, double* u1, double* v1, double* u2, double* y, double r1, double* b2, double *r2)
 {
+	id = id; // unused variable
 	if (n < MPSIZEL1 - 1) {
 		omp_single{
 			int j;
@@ -174,6 +178,7 @@ static void make12(int id, int n, double* u0, double* v0, double* u1, double* v1
 static void make23(int id, int n, double* u0, double* v0, double* u1, double* v1, double* u2, double* v2, double* u3,
 	double* y, double r2, double* b3, double *r3)
 {
+	id = id; // unused variable
 	if (n < MPSIZEL1 - 2) {
 		omp_single{
 			int j;
@@ -248,6 +253,7 @@ static void make23(int id, int n, double* u0, double* v0, double* u1, double* v1
 static void make34(int id, int n, double* u0, double* v0, double* u1, double* v1, double* u2, double* v2, double* u3, double* v3, double* u4,
 	double* y, double r3, double* b4, double *r4)
 {
+	id = id; // unused variable
 	if (n < MPSIZEL1 - 3){
 		omp_single{
 			int j;
@@ -332,78 +338,11 @@ static void make34(int id, int n, double* u0, double* v0, double* u1, double* v1
 	}
 }
 
-static void makev3(int id, int n, double* u0, double* v0, double* u1, double* v1, double* u2, double* v2, double* u3, double* v3,  double* y, double r3)
-{
-	if (n < MPSIZEL1 - 3){
-		omp_single{
-			int j;
-			double t0 = 0., t1 = 0., t2 = 0.;
-			double t3 = 0., t4 = 0., t5 = 0.;
-			simd_for for (j = 0; j < n; ++j) {
-				t0 += v0[j] * u3[j];
-				t1 += u0[j] * u3[j];
-				t2 += v1[j] * u3[j];
-				t3 += u1[j] * u3[j];
-				t4 += v2[j] * u3[j];
-				t5 += u2[j] * u3[j];
-			}
-			double vvu3 = t0, uuu3 = t1;
-			double vvu2 = t2, uuu2 = t3;
-			double vvu1 = t4, uuu1 = t5;
-			double t6 = 0.;
-			simd_for for (j = 0; j < n; ++j) {
-				double yy = y[j]
-					+ u0[j] * vvu3 + v0[j] * uuu3
-					+ u1[j] * vvu2 + v1[j] * uuu2
-					+ u2[j] * vvu1 + v2[j] * uuu1;
-				t6 += yy * u3[j];
-				y[j] = yy;
-			}
-			draxpyz(n, -r3, -0.5 * r3 * t6, u3, y, v3);
-			red0 = red1 = red2 = red3 = red4 = red5 = red6 = 0.;
-		}
-	}
-	else {
-		int j;
-		double t1 = 0., t2 = 0., t3 = 0., t4 = 0., t5 = 0., t6 = 0.;
-		omp_for2 for (j = 0; j < n; ++j) {
-			t1 += v0[j] * u3[j];
-			t2 += u0[j] * u3[j];
-			t3 += v1[j] * u3[j];
-			t4 += u1[j] * u3[j];
-			t5 += v2[j] * u3[j];
-			t6 += u2[j] * u3[j];
-		}
-		omp_atomic red1 += t1;
-		omp_atomic red2 += t2;
-		omp_atomic red3 += t3;
-		omp_atomic red4 += t4;
-		omp_atomic red5 += t5;
-		omp_atomic red6 += t6;
-		omp_barrier;
-		double vvu3 = red1, uuu3 = red2, vvu2 = red3, uuu2 = red4, vvu1 = red5, uuu1 = red6;
-		double t0 = 0.;
-		omp_for2 for (j = 0; j < n; ++j) {
-			double yy = y[j]
-				+ u0[j] * vvu3 + v0[j] * uuu3
-				+ u1[j] * vvu2 + v1[j] * uuu2
-				+ u2[j] * vvu1 + v2[j] * uuu1;
-			t0 += yy * u3[j];
-			y[j] = yy;
-		}
-		omp_atomic red0 += t0;
-		omp_barrier;
-		draxpyz2(n, -r3, -0.5 * r3 * red0, u3, y, v3);
-		omp_single{
-			red0 = red1 = red2 = red3 = red4 = red5 = red6 = 0.;
-		}
-	}
-}
 
 int dsytdc(int n, double* a, int lda, double* d, double* e, double* tau, double* work)
 {
 #ifdef __FUJITSU
-	double* array[16]; // it seemed that alloca doesn't works on K.
+	double* array[16]; // alloca を回避。アライメント関連の問題？？
 #endif
 
 	int mx = omp_get_max_threads();
