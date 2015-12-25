@@ -6,13 +6,21 @@
 #ifdef __FUJITSU
 #define opt_loop PRAGMA(loop noalias) PRAGMA(loop swp) PRAGMA(loop unroll 2) PRAGMA(loop simd aligned)
 #define opt_loop4 PRAGMA(loop noalias) PRAGMA(loop swp) PRAGMA(loop unroll 4) PRAGMA(loop simd aligned) PRAGMA(loop prefetch)
-#define pragma_loop(A) PRAGMA__(loop A)
-#define pragma_proc(A) PRAGMA__(procedure A)
+#define loop_xfill PRAGMA(loop xfill)
+#define loop_noalias PRAGMA(loop noalias)
+#define loop_unroll PRAGMA(loop unroll)
+#define loop_simd_aligned PRAGMA(loop simd aligned)
+#define proc_nofltld PRAGMA(procedure nofltld)
+#define proc_noalias PRAGMA(procedure noalias)
 #else
 #define opt_loop
 #define opt_loop4
-#define pragma_loop(A)
-#define pragma_proc(A)
+#define loop_xfill
+#define loop_noalias
+#define loop_unroll
+#define loop_simd_aligned
+#define proc_nofltld
+#define proc_noalias
 #endif
 
 
@@ -197,8 +205,8 @@ void rotate_uvb11(int n, double* x, double* uf, double* vf, double* to)
 
 void reorder(int n, const double* a, int lda, double* b)
 {
-	pragma_proc(noalias);
-	pragma_proc(nofltld);
+	proc_noalias;
+	proc_nofltld;
 
 	int i;
 #pragma omp for schedule(static, 2)
@@ -206,10 +214,10 @@ void reorder(int n, const double* a, int lda, double* b)
 		int j;
 		double* p = b + i * (i + 1) / 2;
 		if (i + 4 <= n) {
-pragma_loop(xfill)
-pragma_loop(noalias)
-pragma_loop(unroll)
-pragma_loop(simd aligned)
+			loop_xfill
+			loop_noalias
+			loop_unroll
+			loop_simd_aligned
 			for (j = 0; j + 2 <= i; j += 2) {
 				st(p + 4 * j + 0, ld(a + (i + 0) * lda + j));
 				st(p + 4 * j + 2, ld(a + (i + 1) * lda + j));
@@ -228,9 +236,9 @@ pragma_loop(simd aligned)
 			p[4 * j + 9] = a[lda*(i + 3) + j + 3];
 		}
 		else {
-pragma_loop(xfill)
-pragma_loop(noalias)
-pragma_loop(simd aligned)
+			loop_xfill
+			loop_noalias
+			loop_simd_aligned
 			for (j = 0; j + 2 <= i; j += 2) {
 				p[4 * j + 0] = a[lda*i + j];
 				p[4 * j + 1] = a[lda*i + j + 1];
@@ -355,7 +363,7 @@ void getcol1(int i, const double* a, double* b)
 
 void dsymvb(int n, const double* a, const double* x, double* y)
 {
-	pragma_proc(nofltld)
+	proc_nofltld;
 	int i;
 	for (i = 0; i < n; ++i) y[i] = 0.;
 #pragma omp for schedule(static, 2)
@@ -578,8 +586,8 @@ void dsymvb(int n, const double* a, const double* x, double* y)
 #define K 4
 void dsyr24_mvb(int n, double* a, const double* xuv, double* y)
 {
-	pragma_proc(nofltld);
-	pragma_proc(noalias);
+	proc_nofltld;
+	proc_noalias;
 
 	int i;
 	for (i = 0; i < n; ++i) y[i] = 0.;
@@ -688,8 +696,8 @@ void dsyr24_mvb(int n, double* a, const double* xuv, double* y)
 #define K 1
 void dsyr21_mvb(int n, double* a, const double* xuv, double* y)
 {
-	pragma_proc(nofltld);
-	pragma_proc(noalias);
+	proc_nofltld;
+	proc_noalias;
 
 	int i;
 	for (i = 0; i < n; ++i) y[i] = 0.;
