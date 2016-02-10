@@ -6,7 +6,6 @@ CC		= mpifccpx
 VFC		= vtfrtpx
 VCC		= vtfccpx
 CCFLAG	= -Kfast,openmp,ocl -Xg
-CCFLAGD	= -Kopenmp -O0
 
 BLAS	= -SSL2BLAMP
 
@@ -16,7 +15,7 @@ LDFLAG  = $(CCFLAG) $(BLAS) -mlcmain=main
 MAIN	= test
 LOAD	= test
 
-OBJS = common.o dormtrb.o dsyevdt.o dsytdc.o r24mv.o timed.o test.o dlaed3x.o
+OBJS = common.o dormtrb.o dsyevdt.o dsytdc.o r24mv.o timed.o dlaed3x.o
 
 .PHONY : clean
 .PRECIOUS : $(LOAD)
@@ -25,10 +24,14 @@ OBJS = common.o dormtrb.o dsyevdt.o dsytdc.o r24mv.o timed.o test.o dlaed3x.o
 
 all : $(LOAD)
 
+lib : $(OBJS)
+	rm -f libdsyevd.a
+	ar r libdsyevd.a $(OBJS)
+
 clean :
 	rm -f *.o *.out
 
-$(LOAD) : $(OBJS)
+$(LOAD) : $(OBJS) test.o
 	rm -f $(LOAD)
 	$(LD) -o $(LOAD) $(OBJS) $(LDFLAG) $(DEF)
 	@echo "$(LOAD) is now up-to-date"
