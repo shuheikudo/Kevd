@@ -106,7 +106,8 @@ void testtime(int n, int step)
 	int* iw = (int*)bje_alloc(sizeof(int)*liw);
 	if (!a || !d || !w || !iw) abort();
 
-	for( int nn=nb; nn>=step; nn-=step){
+	int nn;
+	for(nn=nb; nn>=step; nn-=step){
 		int ll = (nn+1)/2*2;
 		set_matrix(nn, a, ll, 0);
 		Timed_t begin, end;
@@ -137,7 +138,8 @@ void testtime_lapack(int n, int step)
 	int* iw = (int*)bje_alloc(sizeof(int)*liw);
 	if (!a || !d || !w || !iw) abort();
 
-	for( int nn=nb; nn>=step; nn-=step){
+	int nn;
+	for(nn=nb; nn>=step; nn-=step){
 		int ll = (nn+1)/2*2;
 		set_matrix(nn, a, ll, 0);
 		Timed_t begin, end;
