@@ -6,6 +6,7 @@
 #include <omp.h>
 #include "common.h"
 #include "dsyevdt.h"
+#include "timed.h"
 
 extern void dgemm_(const char*, const char*, int*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int*);
 
@@ -62,9 +63,8 @@ static void set_matrix(int n, double* a, int lda, int type)
 }
 
 
-int main()
+void test1(int n)
 {
-	int n = 213;
 	int lda = (n + 1) / 2 * 2;
 
 
@@ -92,5 +92,69 @@ int main()
 	calc_error(n, as, lda, a, lda, d);
 
 	bje_free(a); bje_free(as); bje_free(d); bje_free(w); bje_free(iw);
+}
+
+void testtime(int n, int step)
+{
+	int nb = n + step;
+	int lda = (nb+1)/2*2;
+	double* a = (double*)bje_alloc(sizeof(double)*nb*lda);
+	double* d = (double*)bje_alloc(sizeof(double)*lda);
+	int lw, liw;
+	dsyevdt_worksizes('V', 'U', nb, omp_get_max_threads(), &lw, &liw);
+	double* w = (double*)bje_alloc(sizeof(double)*lw);
+	int* iw = (int*)bje_alloc(sizeof(int)*liw);
+	if (!a || !d || !w || !iw) abort();
+
+	for( int nn=nb; nn>=step; nn-=step){
+		int ll = (nn+1)/2*2;
+		set_matrix(nn, a, ll, 0);
+		Timed_t begin, end;
+		current_time(&begin);
+		dsyevdt('V', 'U', nn, a, ll, d, w, lw, iw, liw);
+		current_time(&end);
+		printf("%d, %ld\n", nn, duration_in_usec(&end, &begin));
+	}
+
+	bje_free(a); bje_free(d); bje_free(w); bje_free(iw);
+}
+
+void testtime_lapack(int n, int step)
+{
+	int nb = n + step;
+	extern void dsyevd_(const char*, const char*, int*, double*, int*, double*,
+		double*, int*, int*, int*, int*);
+	int lda = (nb+1)/2*2;
+	double* a = (double*)bje_alloc(sizeof(double)*nb*lda);
+	double* d = (double*)bje_alloc(sizeof(double)*lda);
+	int info;
+	double tlw, tliw;
+	int lw = -1, liw = -1;
+	dsyevd_("V", "U", &nb, a, &lda, d, &tlw, &lw, &tliw, &liw, &info);
+	lw = tlw;
+	liw = tliw;
+	double* w = (double*)bje_alloc(sizeof(double)*lw);
+	int* iw = (int*)bje_alloc(sizeof(int)*liw);
+	if (!a || !d || !w || !iw) abort();
+
+	for( int nn=nb; nn>=step; nn-=step){
+		int ll = (nn+1)/2*2;
+		set_matrix(nn, a, ll, 0);
+		Timed_t begin, end;
+		current_time(&begin);
+		dsyevd_("V", "U", &nn, a, &ll, d, w, &lw, iw, &liw, &info);
+		current_time(&end);
+		printf("%d, %ld\n", nn, duration_in_usec(&end, &begin));
+	}
+
+	bje_free(a); bje_free(d); bje_free(w); bje_free(iw);
+}
+
+int main()
+{
+	int n = 4000;
+	// test1(n);
+	testtime(n, 200);
+
 	return 0;
 }

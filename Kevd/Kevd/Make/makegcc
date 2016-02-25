@@ -30,7 +30,7 @@ clean :
 
 $(LOAD) : $(OBJS) test.o
 	rm -f $(LOAD)
-	$(LD) -o $(LOAD) $(OBJS) $(LDFLAG) $(DEF)
+	$(LD) -o $(LOAD) $(OBJS) test.o $(LDFLAG) $(DEF)
 	@echo "$(LOAD) is now up-to-date"
 
 
