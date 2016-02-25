@@ -129,7 +129,8 @@ void testtime_lapack(int n, int step)
 	double* a = (double*)bje_alloc(sizeof(double)*nb*lda);
 	double* d = (double*)bje_alloc(sizeof(double)*lda);
 	int info;
-	double tlw, tliw;
+	double tlw;
+	int tliw;
 	int lw = -1, liw = -1;
 	dsyevd_("V", "U", &nb, a, &lda, d, &tlw, &lw, &tliw, &liw, &info);
 	lw = tlw;
