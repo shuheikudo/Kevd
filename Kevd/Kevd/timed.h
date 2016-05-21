@@ -6,25 +6,25 @@
 #include <stdarg.h>
 
 // for VS
-#ifdef _MSC_VER
+#if defined(_WIN32) || defined(_WIN64)
 #include <time.h>
 #include "common.h"
 typedef clock_t Timed_t;
-inline Timed_t* epoch(int p)
+static inline Timed_t* epoch(int p)
 {
 	static Timed_t start;
 	if (p) start = clock();
 	return &start;
 }
-inline void current_time(Timed_t* cur)
+static inline void current_time(Timed_t* cur)
 {
 	*cur = clock();
 }
-inline double duration_in_sec(const Timed_t*lhs, const Timed_t*rhs)
+static inline double duration_in_sec(const Timed_t*lhs, const Timed_t*rhs)
 {
 	return (double)(*lhs - *rhs) / CLOCKS_PER_SEC;
 }
-inline int64_t duration_in_usec(const Timed_t* lhs, const Timed_t*rhs)
+static inline int64_t duration_in_usec(const Timed_t* lhs, const Timed_t*rhs)
 {
 	return (int64_t)(duration_in_sec(lhs, rhs) * 1000000);
 }

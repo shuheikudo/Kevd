@@ -2,10 +2,12 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
+#include <inttypes.h>
 
 #include "timed.h"
 
-#ifndef _MSC_VER
+#if !(defined(_WIN32)||defined(_WIN64))
 Timed_t* epoch(int p)
 {
 	static Timed_t start;
@@ -89,7 +91,7 @@ void log_current_time(unsigned id, unsigned indent, const char* tag)
 	Timed_t t;
 	FILE* fp = log_file(0);
 	current_time(&t);
-	if (fp) fprintf(fp, "%d, %d, %s, %lld\n", id, indent, tag, duration_in_usec(&t, epoch(0)));
+	if (fp) fprintf(fp, "%d, %d, %s, %" PRId64 "\n", id, indent, tag, duration_in_usec(&t, epoch(0)));
 }
 
 

@@ -346,11 +346,11 @@ int dsytdc(int n, double* a, int lda, double* d, double* e, double* tau, double*
 
 	double* vt = work;
 	double* vv = work + 9 * lda;
-	double** ys = 0;
+	double* ys[mx]; // C99
 	double* y = work + 13 * lda;
+	
 
 	if (doomp) {
-		ys = (double**)bje_alloca(mx*sizeof(double*));
 		int i;
 		for (i = 0; i < mx; ++i) {
 			ys[i] = work + (13 + i) * lda;
@@ -445,7 +445,7 @@ int dsytdc(int n, double* a, int lda, double* d, double* e, double* tau, double*
 		dsymvb(i, wa, u0, y);
 	}
 
-	// do lasting updates
+	// 残りの
 	for (; i >= 2; --i) {
 		double* u0 = a + (i - 0) * lda;
 		double* u1 = a + (i - 1) * lda;

@@ -21,11 +21,17 @@ inline void bje_free(void* p)
 typedef uintptr_t UPTR_T;
 #define PRAGMA(A) __pragma(A)
 #else
+
+#include <stdlib.h>
 #define NOINLINE __attribute__((noinline))
 #include <stdlib.h>
 void* bje_alloc(size_t size);
 void bje_free(void* p);
+#ifdef __GNUC__
+#define bje_alloca(size) __builtin_alloca(size)
+#else
 #define bje_alloca(size) alloca(size)
+#endif
 typedef unsigned long long UPTR_T;
 #define PRAGMA(A) _Pragma(#A)
 #endif

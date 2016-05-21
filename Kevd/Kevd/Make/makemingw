@@ -1,0 +1,44 @@
+#--------------------------------------------
+#For gcc
+#--------------------------------------------
+FC=gfortran
+CC=gcc
+CCFLAG=-std=c99 -Wall -Wextra -O3 -fopenmp -ftree-vectorize -march=native -mtune=native -mstackrealign -g3
+
+BLAS=-L./ -lblas -llapack
+LD=$(CC)
+LDFLAG=$(CCFLAG) $(BLAS)
+
+MAIN=test.exe
+LOAD=test.exe
+
+OBJS=common.o dormtrb.o dsyevdt.o dsytdc.o r24mv.o timed.o dlaed3x.o
+
+.PHONY : clean
+.PRECIOUS : $(LOAD)
+.SUFFIXES : .o .c .f .f90
+
+
+all : $(LOAD)
+
+lib : $(OBJS)
+	rm -f libdsyevd.a
+	ar r libdsyevd.a $(OBJS)
+
+clean :
+	rm -f *.o *.exe
+
+$(LOAD) : $(OBJS) test.o
+	$(LD) -o $(LOAD) $(OBJS) test.o $(LDFLAG) $(DEF)
+	@echo "$(LOAD) is now up-to-date"
+
+
+.c.o : 
+	$(CC) $(CCFLAG) -c $< $(DEF)
+
+.f.o : 
+	$(FC) $(CCFLAG) -c $< $(DEF)
+
+.f90.o : 
+	$(FC) $(CCFLAG) -c $< $(DEF)
+

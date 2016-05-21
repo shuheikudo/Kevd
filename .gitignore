@@ -188,6 +188,11 @@ GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
 
-# Linux object files
+# Linux object files and external libs
 *.o
 *.out
+*.exe
+*.lib
+*.dll
+
+Kevd/Kevd/Kevd/extinc/*
