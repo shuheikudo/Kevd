@@ -119,17 +119,17 @@ void dsyevdeasy_(int* n, double* a, int* lda, double* w)
 	int* iwork = (int*)bje_alloc(liwork*sizeof(int));
 	double* work = (double*)bje_alloc(lwork*sizeof(double));
 	if (!iwork || !work) abort();
-	if ((*lda) % 2){
+	if (*lda%2){
 		int i;
-		int lda2 = *n + 1;
+		int lda2 = (*n + 1)/2*2;
 		double* t, *t2;
 		if (!(t = (double*)bje_alloc(*n*lda2*sizeof(double)))) abort();
 		if (!(t2 = (double*)bje_alloc(lda2*sizeof(double)))) abort();
 		for (i = 0; i < *n; ++i)
-			memcpy(t + lda2*i, a + *n * i, sizeof(double)**n);
+			memcpy(t + lda2*i, a + *lda * i, sizeof(double)**n);
 		if (dsyevdt('V', 'U', *n, t, lda2, t2, work, lwork, iwork, liwork)) abort();
 		for (i = 0; i < *n; ++i)
-			memcpy(a + *n * i, t + lda2*i, sizeof(double)**n);
+			memcpy(a + *lda * i, t + lda2*i, sizeof(double)**n);
 		memcpy(t, t2, sizeof(double)*lda2);
 		bje_free(t);
 		bje_free(t2);
@@ -438,11 +438,11 @@ int dlaed1x(int n, double* d, double* q, int ldq, int* indxq, double rho, int cu
 		int i1 = iwork[coltyp + 0];
 		int i2 = iwork[coltyp + 1];
 		int is = (i0 + i1) * cutpnt + (i1 + i2)*(n - cutpnt) + iq2;
-#ifdef __FUJITSU
+//#ifdef __FUJITSU
 #define ED3 dlaed3x_
-#else
-#define ED3 dlaed3_
-#endif
+//#else
+//#define ED3 dlaed3_
+//#endif
 		ED3(&k, &n, &cutpnt, d, q, &ldq, &rho, work + idlmda -1, 
 			work + iq2 - 1, iwork + indxc -1, iwork + coltyp - 1, 
 			work + iw - 1, work + is - 1, &info);

@@ -350,7 +350,7 @@ int dsytdc(int n, double* a, int lda, double* d, double* e, double* tau, double*
 	double* y = work + 13 * lda;
 
 	if (doomp) {
-		ys = (double**)bje_alloca(mx*sizeof(double*));
+		ys = (double**)malloc(mx*sizeof(double*));
 		int i;
 		for (i = 0; i < mx; ++i) {
 			ys[i] = work + (13 + i) * lda;
@@ -466,6 +466,7 @@ int dsytdc(int n, double* a, int lda, double* d, double* e, double* tau, double*
 	d[1] = a[1 + lda];
 	e[0] = b0;
 	tau[0] = r0;
+	if(ys) free(ys);
 	return 0;
 }
 

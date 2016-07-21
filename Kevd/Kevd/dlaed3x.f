@@ -159,11 +159,11 @@
 *     2*DLAMBDA(I) to prevent optimizing compilers from eliminating
 *     this code.
 *
-#ifdef NOGUARDDIGIT
-      DO 10 I = 1, K
-         DLAMDA( I ) = DLAMC3( DLAMDA( I ), DLAMDA( I ) ) - DLAMDA( I )
-   10 CONTINUE
-#endif
+!#ifdef NOGUARDDIGIT
+!      DO 10 I = 1, K
+!         DLAMDA( I ) = DLAMC3( DLAMDA( I ), DLAMDA( I ) ) - DLAMDA( I )
+!   10 CONTINUE
+!#endif
 
 !$OMP PARALLEL DO REDUCTION(MAX:INFO)
       DO 20 J = 1, K
@@ -233,9 +233,13 @@
 
       CALL DLACPY( 'A', N12, K, Q, LDQ, S, N12 )
 
-      CALL DGEMM( 'N', 'N', N1, K, N12,
-     $     ONE, Q2, N1, S, N12,
-     $     ZERO, Q, LDQ )
+      IF(N12.NE.0) THEN
+          CALL DGEMM( 'N', 'N', N1, K, N12,
+     $         ONE, Q2, N1, S, N12,
+     $         ZERO, Q, LDQ )
+      ELSE
+          CALL DLASET( 'A', N1, K, ZERO, ZERO, Q( 1, 1 ), LDQ)
+      END IF
 
   120 CONTINUE
       RETURN

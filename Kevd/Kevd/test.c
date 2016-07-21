@@ -106,6 +106,9 @@ void testtime(int n, int step)
 	int* iw = (int*)bje_alloc(sizeof(int)*liw);
 	if (!a || !d || !w || !iw) abort();
 
+	FILE* fp = fopen("evd_test.dat", "w");
+	if(!fp) abort();
+
 	int nn;
 	for(nn=nb; nn>=step; nn-=step){
 		int ll = (nn+1)/2*2;
@@ -114,10 +117,11 @@ void testtime(int n, int step)
 		current_time(&begin);
 		dsyevdt('V', 'U', nn, a, ll, d, w, lw, iw, liw);
 		current_time(&end);
-		printf("%d, %ld\n", nn, duration_in_usec(&end, &begin));
+		fprintf(fp, "%d, %ld\n", nn, duration_in_usec(&end, &begin));
 	}
 
 	bje_free(a); bje_free(d); bje_free(w); bje_free(iw);
+	fclose(fp);
 }
 
 void testtime_lapack(int n, int step)
@@ -139,6 +143,8 @@ void testtime_lapack(int n, int step)
 	int* iw = (int*)bje_alloc(sizeof(int)*liw);
 	if (!a || !d || !w || !iw) abort();
 
+	FILE* fp = fopen("evd_test_lapack.dat", "w");
+	if(!fp) abort();
 	int nn;
 	for(nn=nb; nn>=step; nn-=step){
 		int ll = (nn+1)/2*2;
@@ -147,17 +153,30 @@ void testtime_lapack(int n, int step)
 		current_time(&begin);
 		dsyevd_("V", "U", &nn, a, &ll, d, w, &lw, iw, &liw, &info);
 		current_time(&end);
-		printf("%d, %ld\n", nn, duration_in_usec(&end, &begin));
+		fprintf(fp, "%d, %ld\n", nn, duration_in_usec(&end, &begin));
 	}
 
 	bje_free(a); bje_free(d); bje_free(w); bje_free(iw);
+	fclose(fp);
 }
 
-int main()
+int main(int argc, char** argv)
 {
-	int n = 4000;
-	// test1(n);
-	testtime(n, 200);
+	int n = 1232;
+	int mode = 0;
+	if(argc>1) mode = atoi(argv[1]);
+	switch(mode){
+	default:
+	case 0:
+		test1(n);
+		break;
+	case 1:
+		testtime(n, 200);
+		break;
+	case 2:
+		testtime_lapack(n, 200);
+		break;
+	}
 
 	return 0;
 }
