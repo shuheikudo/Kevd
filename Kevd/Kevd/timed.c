@@ -2,6 +2,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
 
 #include "timed.h"
 
@@ -9,24 +10,34 @@
 Timed_t* epoch(int p)
 {
 	static Timed_t start;
-	if (p) gettimeofday(&start, NULL);
+	if (p) clock_gettime(CLOCK_REALTIME, &start);
 	return &start;
 }
 void current_time(Timed_t* cur)
 {
-	gettimeofday(cur, NULL);
+	clock_gettime(CLOCK_REALTIME, cur);
 }
 double duration_in_sec(const Timed_t* lhs, const Timed_t* rhs)
 {
 	Timed_t res;
-	timersub(lhs, rhs, &res);
-	return (double)res.tv_sec + (double)res.tv_usec / 1000000;
+	res.tv_sec = lhs->tv_sec - rhs->tv_sec;
+	res.tv_nsec = lhs->tv_nsec - rhs->tv_nsec;
+	if(res.tv_nsec < 0) {
+		--res.tv_sec;
+		res.tv_nsec += 1000000000;
+	}
+	return (double)res.tv_sec + (double)res.tv_nsec / 1000000000;
 }
 int64_t duration_in_usec(const Timed_t* lhs, const Timed_t* rhs)
 {
 	Timed_t res;
-	timersub(lhs, rhs, &res);
-	return ((int64_t)res.tv_sec) * 1000000LL + res.tv_usec;
+	res.tv_sec = lhs->tv_sec - rhs->tv_sec;
+	res.tv_nsec = lhs->tv_nsec - rhs->tv_nsec;
+	if(res.tv_nsec < 0) {
+		--res.tv_sec;
+		res.tv_nsec += 1000000000;
+	}
+	return ((int64_t)res.tv_sec) * 1000000LL + (res.tv_nsec+500)/1000;
 }
 #endif
 
@@ -89,7 +100,7 @@ void log_current_time(unsigned id, unsigned indent, const char* tag)
 	Timed_t t;
 	FILE* fp = log_file(0);
 	current_time(&t);
-	if (fp) fprintf(fp, "%d, %d, %s, %lld\n", id, indent, tag, duration_in_usec(&t, epoch(0)));
+	if (fp) fprintf(fp, "%d, %d, %s, %ld\n", id, indent, tag, duration_in_usec(&t, epoch(0)));
 }
 
 

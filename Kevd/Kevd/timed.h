@@ -4,10 +4,11 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdarg.h>
+#include <sys/time.h>
+#include <time.h>
 
 // for VS
 #ifdef _MSC_VER
-#include <time.h>
 #include "common.h"
 typedef clock_t Timed_t;
 inline Timed_t* epoch(int p)
@@ -29,8 +30,7 @@ inline int64_t duration_in_usec(const Timed_t* lhs, const Timed_t*rhs)
 	return (int64_t)(duration_in_sec(lhs, rhs) * 1000000);
 }
 #else
-#include <sys/time.h>
-typedef struct timeval Timed_t;
+typedef struct timespec Timed_t;
 Timed_t* epoch(int p);
 void current_time(Timed_t* cur);
 double duration_in_sec(const Timed_t* lhs, const Timed_t* rhs);
