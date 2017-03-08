@@ -117,7 +117,7 @@ void testtime(int n, int step)
 		current_time(&begin);
 		dsyevdt('V', 'U', nn, a, ll, d, w, lw, iw, liw);
 		current_time(&end);
-		fprintf(fp, "%d, %ld\n", nn, duration_in_usec(&end, &begin));
+		printf("%d, %.15e\n", nn, duration_in_sec(&end, &begin));
 	}
 
 	bje_free(a); bje_free(d); bje_free(w); bje_free(iw);
@@ -153,7 +153,7 @@ void testtime_lapack(int n, int step)
 		current_time(&begin);
 		dsyevd_("V", "U", &nn, a, &ll, d, w, &lw, iw, &liw, &info);
 		current_time(&end);
-		fprintf(fp, "%d, %ld\n", nn, duration_in_usec(&end, &begin));
+		printf("%d, %.15ed\n", nn, duration_in_sec(&end, &begin));
 	}
 
 	bje_free(a); bje_free(d); bje_free(w); bje_free(iw);
