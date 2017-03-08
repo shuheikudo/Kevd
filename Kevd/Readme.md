@@ -1,14 +1,21 @@
 # Kevd
-K�p�ɍœK�����ꂽLAPACK��DSYEVD�ł��B�f�[�^���C�A�E�g���H�v���邱�ƂŁA�������A�N�Z�X�p�^�[����P�������āA�s�[�N�������o���h���ɋ߂����������\�������o����悤�A�H�v����Ă��܂��B
-����R���p�C���ŖړI�ʂ�̃R�[�h���f����悤�A���s���낵�����߁A��ϋꂵ���R�[�h�ɂȂ��Ă��܂��B
+K用に最適化されたLAPACKのDSYEVDです。データレイアウトを工夫することで、
+メモリアクセスパターンを単純化して、ピークメモリバンド幅に近い
+メモリ性能を引き出せるよう、工夫されています。
+あるコンパイラで目的通りのコードが吐けるよう、試行錯誤したため、
+大変苦しいコードになっています。
 
-LAPACK�̃R�[�h���Q�l�ɍ�������̂������ł����A���̌�A�ꂩ�珑�����������߁ALAPACK�̃\�[�X�R�[�h���c���Ă�����̂͏��Ȃ��ł��B
+LAPACKのコードを参考に作ったものが多いですが、その後、
+一から書き直したため、LAPACKのソースコードが残っているものは少ないです。
 
-## �g����
-dsyevdt_ ��LAPACK�ƈꕔ�݊���������܂��B�ڍׂ�LAPACK�̃}�j���A�����Q�Ƃ��Ă��������B����Ƃ��āAjobz="V", uplo="U"�łȂ���Γ����܂���B�܂��ǂ�CPU�ł��A16byte�A���C�������g��v�����܂��B
+## 使い方
+LAPACKのdsyevdと比べて機能が削減されています。
+詳細はLAPACKのマニュアルとtest.cを参照してください。
+制約として、jobz="V", uplo="U"でなければ動きません。
+またどのCPUでも、16byteアラインメントを要求します。
 
-dsyevdt ��C����p�̃C���^�[�t�F�[�X�ł��B�g������test.c���������������B
+dsyevdt はC言語用のインターフェースです。使い方はtest.cをご覧ください。
 
-dsyevdeasy_ �͎����I��working memory���m�ۂ��܂��B
+dsyevdeasy_ は自動的にworking memoryを確保します。
 
 

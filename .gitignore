@@ -191,3 +191,6 @@ ModelManifest.xml
 # Linux object files
 *.o
 *.out
+*.dat
+*.a
+*.swp

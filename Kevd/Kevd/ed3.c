@@ -1,5 +1,7 @@
 #include <math.h>
 #include <omp.h>
+#include "copymat.h"
+
 #define MAX__(a,b) ((a)<(b)?(b):(a))
 #define MIN__(a,b) ((a)<(b)?(a):(b))
 static void dlacpy_c(char c, int n, int m, double* a, int lda, double* b, int ldb)
@@ -89,13 +91,12 @@ int ed3(int k, int n, int n1, double* d, double* q, int ldq, double rho, double*
 	int n2 = n - n1;
 	int n12 = ctot[0] + ctot[1];
 	int n23 = ctot[1] + ctot[2];
-	dlacpy_c('A', n23, k, q+ctot[0], ldq, s, n23);
+	copymat(n23, k, q+ctot[0], ldq, s, n23);
 	if(n23 != 0)
 		dgemm_c('N', 'N', n2, k, n23, 1., q2+n1*n12, n2, s, n23, 0., q+n1, ldq);
 	else
 		dlaset_c('A', n2, k, 0., 0., q+n1, ldq);
-
-	dlacpy_c('A', n12, k, q, ldq, s, n12);
+	copymat(n12, k, q, ldq, s, n12);
 	if(n12 != 0)
 		dgemm_c('N', 'N', n1, k, n12, 1., q2, n1, s, n12, 0., q, ldq);
 	else

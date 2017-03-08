@@ -14,6 +14,7 @@
 #include "dormtrb.h"
 #include "simd_tools.h"
 #include "ed3.h"
+#include "copymat.h"
 
 
 static int MAXI(int a, int b) { return a < b ? b : a; }
@@ -43,12 +44,6 @@ void dcopy_c(int n, const double* a, int t1, double* d, int t2)
 }
 
 extern void dswap_(const int*, double*, const int*, double*, const int*);
-
-extern void dlacpy_(const char*, const int*, const int*, const double*, const int*, double*, const int*);
-static void dlacpy_c(char uplo, int m, int n, const double* a, int lda, double* b, int ldb)
-{
-	dlacpy_(&uplo, &m, &n, a, &lda, b, &ldb);
-}
 
 extern void dlaset_(const char*, const int*, const int*, const double*, const double*, double*, const int*);
 extern double dlansy_(const char*, const char*, const int*, double*, const int*, double*);
@@ -182,7 +177,7 @@ int dsyevdt(char jobz, char uplo, int n, double* a, int lda, double* w, double* 
 	MEASUREI(info, "dormtr", dormtrb, n, n, a, lda, wtau, wwrk, ldc, wwk2);
 	if (info) return info;
 
-	dlacpy_("A", &n, &n, wwrk, &ldc, a, &lda);
+	copymat(n, n, wwrk, ldc, a, lda);
 
 	if (sigma != 0.) dscal_c(n, 1.0 / sigma, w, 1);
 	return 0;
@@ -382,10 +377,7 @@ static int dlaed0I(int N, double* D, double* E, double* Q, int LDQ, double* WORK
 		memcpy(WORK + N*I + N, Q + J*LDQ, N*sizeof(double));
 	}
 	memcpy(D, WORK, N*sizeof(double));
-	if (N == LDQ)
-		memcpy(Q, WORK + N, N*N*sizeof(double));
-	else
-		dlacpy_c('A', N, N, WORK + N, N, Q, LDQ);
+	copymat(N, N, WORK+N, N, Q, LDQ);
 
 	return 0;
 }

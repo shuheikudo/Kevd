@@ -12,7 +12,7 @@ LDFLAG=$(CCFLAG) $(BLAS)
 MAIN=test.out
 LOAD=test.out
 
-OBJS=common.o dormtrb.o dsyevdt.o dsytdc.o r24mv.o timed.o dlaed3x.o ed3.o
+OBJS=common.o dormtrb.o dsyevdt.o dsytdc.o r24mv.o timed.o dlaed3x.o ed3.o copymat.o
 
 .PHONY : clean
 .PRECIOUS : $(LOAD)
